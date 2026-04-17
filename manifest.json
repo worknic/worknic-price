@@ -1,0 +1,25 @@
+{
+  "name": "WORKNIC 가격 검색",
+  "short_name": "WORKNIC",
+  "description": "WORKNIC 마끼다 제품 가격 검색 및 고객 안내 문자 생성",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F1EB",
+  "theme_color": "#F5F1EB",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
