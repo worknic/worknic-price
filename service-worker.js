@@ -2,7 +2,7 @@
 // 버전이 바뀔 때마다 CACHE_NAME의 날짜를 변경하면 팀원들이 자동으로 최신 버전으로 업데이트됩니다.
 // 예: 가격표 업데이트 후 → CACHE_NAME = 'worknic-price-2026-05-01'
 
-const CACHE_NAME = 'worknic-price-2026-04-17-v2';
+const CACHE_NAME = 'worknic-price-2026-04-17-v3';
 const ASSETS = [
   './',
   './index.html',

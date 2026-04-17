@@ -645,6 +645,69 @@
     border-radius: 12px;
     color: var(--red);
   }
+  .auth-icon.amber {
+    background: var(--amber-bg);
+    color: var(--amber);
+  }
+  .auth-icon.red {
+    background: var(--red-bg);
+    color: var(--red);
+  }
+  .auth-link {
+    color: var(--amber);
+    text-decoration: none;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+  .auth-link:active { opacity: 0.7; }
+  .auth-info-box {
+    background: var(--ivory-2);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+  .auth-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    font-size: 13px;
+  }
+  .auth-info-label {
+    color: var(--dark-60);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3px;
+  }
+  .auth-info-value {
+    color: var(--dark);
+    font-weight: 500;
+  }
+  .auth-loading {
+    position: absolute;
+    inset: 0;
+    background: rgba(245, 241, 235, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 18px;
+    backdrop-filter: blur(2px);
+  }
+  .auth-spinner {
+    width: 28px;
+    height: 28px;
+    border: 2.5px solid var(--dark-10);
+    border-top-color: var(--dark);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .auth-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
   .auth-title {
     text-align: center;
     font-size: 15px;
@@ -851,29 +914,117 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- ===== 대리점가 인증 모달 ===== -->
+<!-- ===== 대리점가 회원 인증 모달 ===== -->
 <div class="auth-bg" id="auth-bg">
   <div class="auth-modal">
-    <div class="auth-icon">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="11" width="18" height="11" rx="2"/>
-        <path d="M7 11V7a5 5 0 0110 0v4"/>
-      </svg>
+
+    <!-- 단계 1: 로그인 (연락처 입력) -->
+    <div class="auth-step" data-step="login">
+      <div class="auth-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0110 0v4"/>
+        </svg>
+      </div>
+      <div class="auth-title">대리점가 열람</div>
+      <div class="auth-desc">
+        WORKNIC 팀 전용 구역입니다<br>
+        등록하신 연락처로 입장해 주세요
+      </div>
+      <div class="auth-input-wrap">
+        <input type="tel" class="auth-input" id="auth-phone" placeholder="010-0000-0000" autocomplete="off" spellcheck="false" inputmode="tel" maxlength="13">
+      </div>
+      <div class="auth-error-msg" id="auth-error"></div>
+      <div class="auth-actions">
+        <button class="auth-btn ghost" onclick="closeAuth()">취소</button>
+        <button class="auth-btn primary" id="auth-submit-login" onclick="doLogin()">
+          <span class="btn-text">확인</span>
+        </button>
+      </div>
+      <div class="auth-session-info">
+        처음이신가요? <a href="#" onclick="switchToRegister(); return false;" class="auth-link">가입 요청</a>
+      </div>
     </div>
-    <div class="auth-title">대리점가 열람 인증</div>
-    <div class="auth-desc">
-      매입가(대리점가) 열람을 위한<br>
-      WORKNIC 팀 전용 비밀번호를 입력하세요.
+
+    <!-- 단계 2: 신규 가입 (이름 + 연락처) -->
+    <div class="auth-step" data-step="register" style="display:none;">
+      <div class="auth-icon amber">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M20 8v6M23 11h-6"/>
+        </svg>
+      </div>
+      <div class="auth-title">가입 요청</div>
+      <div class="auth-desc">
+        이름과 연락처를 입력해 주세요<br>
+        워크닉 승인 후 문자로 안내드립니다
+      </div>
+      <div class="auth-input-wrap">
+        <input type="text" class="auth-input" id="reg-name" placeholder="이름" autocomplete="off" spellcheck="false" maxlength="20">
+      </div>
+      <div class="auth-input-wrap">
+        <input type="tel" class="auth-input" id="reg-phone" placeholder="010-0000-0000" autocomplete="off" spellcheck="false" inputmode="tel" maxlength="13">
+      </div>
+      <div class="auth-error-msg" id="reg-error"></div>
+      <div class="auth-actions">
+        <button class="auth-btn ghost" onclick="switchToLogin()">돌아가기</button>
+        <button class="auth-btn primary" id="auth-submit-register" onclick="doRegister()">
+          <span class="btn-text">신청하기</span>
+        </button>
+      </div>
     </div>
-    <div class="auth-input-wrap">
-      <input type="password" class="auth-input" id="auth-input" placeholder="비밀번호" autocomplete="off" spellcheck="false">
+
+    <!-- 단계 3: 승인 대기 -->
+    <div class="auth-step" data-step="pending" style="display:none;">
+      <div class="auth-icon amber">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 6v6l4 2"/>
+        </svg>
+      </div>
+      <div class="auth-title">승인 대기 중</div>
+      <div class="auth-desc">
+        신청이 접수되었습니다<br>
+        워크닉에서 확인 후 연락드립니다
+      </div>
+      <div class="auth-info-box">
+        <div class="auth-info-row">
+          <span class="auth-info-label">이름</span>
+          <span class="auth-info-value" id="pending-name">-</span>
+        </div>
+        <div class="auth-info-row">
+          <span class="auth-info-label">연락처</span>
+          <span class="auth-info-value" id="pending-phone">-</span>
+        </div>
+      </div>
+      <div class="auth-actions">
+        <button class="auth-btn primary" onclick="closeAuth()" style="flex:1;">확인</button>
+      </div>
     </div>
-    <div class="auth-error-msg" id="auth-error"></div>
-    <div class="auth-actions">
-      <button class="auth-btn ghost" onclick="closeAuth()">취소</button>
-      <button class="auth-btn primary" onclick="verifyAuth()">확인</button>
+
+    <!-- 단계 4: 거부 -->
+    <div class="auth-step" data-step="rejected" style="display:none;">
+      <div class="auth-icon red">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M15 9l-6 6M9 9l6 6"/>
+        </svg>
+      </div>
+      <div class="auth-title">접근 권한이 없습니다</div>
+      <div class="auth-desc">
+        승인되지 않은 연락처입니다<br>
+        문의: 1833-3640
+      </div>
+      <div class="auth-actions">
+        <button class="auth-btn primary" onclick="closeAuth()" style="flex:1;">확인</button>
+      </div>
     </div>
-    <div class="auth-session-info">인증 유지: 7일간 자동 저장</div>
+
+    <!-- 로딩 오버레이 -->
+    <div class="auth-loading" id="auth-loading" style="display:none;">
+      <div class="auth-spinner"></div>
+    </div>
   </div>
 </div>
 
@@ -1106,23 +1257,29 @@ function clearRecent() {
 }
 
 // ============================================
-// 🔒 대리점가 인증 시스템
+// 🔒 대리점가 회원 인증 시스템 (Google Sheets 연동)
 // ============================================
-// 비밀번호는 SHA-256 해시로 저장 (평문 아님)
-// Salt를 결합한 후 해시 — 원본 역산 매우 어려움
-const AUTH_HASH = '9ec88e7756a91a60ab4daf767bfdfe6ce21017e33b961ef635d97d13595ba248';
-const AUTH_SALT = 'WORKNIC_2026_PRICE_APP_SALT';
-const AUTH_SESSION_KEY = 'wk_dealer_auth';
+const AUTH_API_URL = 'https://script.google.com/macros/s/AKfycbwSq8nRmFEywxGGiZx2gcRaPKox5tSPNgodY8FSxDax1BhW1GLiG-UaUprM1gh7-ARQ/exec';
+const AUTH_SESSION_KEY = 'wk_dealer_auth_v2';
 const AUTH_DURATION_DAYS = 7;
 
-// 비밀번호 해시 계산 (Web Crypto API)
-async function hashPassword(pw) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(pw + AUTH_SALT);
-  const buf = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(buf))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
+// 연락처 정규화 (숫자만)
+function normalizePhone(phone) {
+  return String(phone || '').replace(/[^\d]/g, '');
+}
+
+// 연락처 포맷 (010-xxxx-xxxx)
+function formatPhone(phone) {
+  const n = normalizePhone(phone);
+  if (n.length === 11) return `${n.slice(0,3)}-${n.slice(3,7)}-${n.slice(7)}`;
+  if (n.length === 10) return `${n.slice(0,3)}-${n.slice(3,6)}-${n.slice(6)}`;
+  return phone;
+}
+
+// 연락처 유효성
+function isValidPhone(phone) {
+  const n = normalizePhone(phone);
+  return n.length === 10 || n.length === 11;
 }
 
 // 세션 유효성 체크
@@ -1131,22 +1288,32 @@ function isAuthValid() {
     const raw = localStorage.getItem(AUTH_SESSION_KEY);
     if (!raw) return false;
     const session = JSON.parse(raw);
-    if (!session.token || !session.expiresAt) return false;
+    if (!session.phone || !session.name || !session.expiresAt) return false;
     if (Date.now() > session.expiresAt) {
       localStorage.removeItem(AUTH_SESSION_KEY);
       return false;
     }
-    // 토큰은 해시 + 만료시간 조합으로 검증
-    return session.token === AUTH_HASH;
+    return true;
   } catch (e) {
     return false;
   }
 }
 
-function saveAuthSession() {
+function getCurrentUser() {
+  try {
+    const raw = localStorage.getItem(AUTH_SESSION_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+function saveAuthSession(name, phone) {
   const expiresAt = Date.now() + AUTH_DURATION_DAYS * 24 * 60 * 60 * 1000;
   localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({
-    token: AUTH_HASH,
+    name: name,
+    phone: phone,
     expiresAt: expiresAt,
     issuedAt: Date.now()
   }));
@@ -1156,58 +1323,243 @@ function clearAuthSession() {
   localStorage.removeItem(AUTH_SESSION_KEY);
 }
 
+// ============================================
+// API 호출
+// ============================================
+async function callAuthAPI(action, params) {
+  // Apps Script는 CORS 이슈가 있을 수 있어 GET 파라미터 방식 사용
+  const url = new URL(AUTH_API_URL);
+  url.searchParams.set('action', action);
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+
+  const response = await fetch(url.toString(), {
+    method: 'GET',
+    redirect: 'follow'
+  });
+
+  if (!response.ok) throw new Error('API 요청 실패');
+  return await response.json();
+}
+
+// ============================================
+// 모달 단계 전환
+// ============================================
+function showAuthStep(step) {
+  document.querySelectorAll('.auth-step').forEach(el => {
+    el.style.display = el.dataset.step === step ? 'block' : 'none';
+  });
+  // 에러 메시지 초기화
+  document.getElementById('auth-error').textContent = '';
+  document.getElementById('reg-error').textContent = '';
+  // 입력필드 에러 클래스 제거
+  document.querySelectorAll('.auth-input').forEach(i => i.classList.remove('error'));
+}
+
+function switchToRegister() {
+  showAuthStep('register');
+  // 로그인 화면에 입력한 연락처를 가져옴
+  const loginPhone = document.getElementById('auth-phone').value.trim();
+  if (loginPhone) {
+    document.getElementById('reg-phone').value = loginPhone;
+  }
+  setTimeout(() => document.getElementById('reg-name').focus(), 100);
+}
+
+function switchToLogin() {
+  showAuthStep('login');
+  setTimeout(() => document.getElementById('auth-phone').focus(), 100);
+}
+
+function setLoading(isLoading) {
+  document.getElementById('auth-loading').style.display = isLoading ? 'flex' : 'none';
+  document.querySelectorAll('#auth-bg button').forEach(b => b.disabled = isLoading);
+}
+
+// ============================================
 // 인증 모달 열기
+// ============================================
 function openAuth() {
   document.getElementById('auth-bg').classList.add('show');
-  document.getElementById('auth-input').value = '';
-  document.getElementById('auth-error').textContent = '';
-  document.getElementById('auth-input').classList.remove('error');
-  setTimeout(() => document.getElementById('auth-input').focus(), 150);
+  document.getElementById('auth-phone').value = '';
+  document.getElementById('reg-name').value = '';
+  document.getElementById('reg-phone').value = '';
+  showAuthStep('login');
+  setTimeout(() => document.getElementById('auth-phone').focus(), 150);
 }
 
 function closeAuth() {
   document.getElementById('auth-bg').classList.remove('show');
+  setLoading(false);
 }
 
-// 인증 검증
-async function verifyAuth() {
-  const input = document.getElementById('auth-input');
+// ============================================
+// 로그인 처리
+// ============================================
+async function doLogin() {
+  const phoneInput = document.getElementById('auth-phone');
   const errorEl = document.getElementById('auth-error');
-  const pw = input.value;
+  const phone = phoneInput.value.trim();
 
-  if (!pw) {
-    errorEl.textContent = '비밀번호를 입력하세요';
-    input.classList.add('error');
+  if (!phone) {
+    errorEl.textContent = '연락처를 입력하세요';
+    phoneInput.classList.add('error');
+    return;
+  }
+  if (!isValidPhone(phone)) {
+    errorEl.textContent = '올바른 연락처 형식이 아닙니다';
+    phoneInput.classList.add('error');
     return;
   }
 
-  const hash = await hashPassword(pw);
-  if (hash === AUTH_HASH) {
-    // 성공
-    saveAuthSession();
-    closeAuth();
-    enableDealerView();
-    toast('✓ 인증 완료 — 7일간 유지됩니다');
-  } else {
-    // 실패
-    errorEl.textContent = '비밀번호가 올바르지 않습니다';
-    input.classList.add('error');
-    input.value = '';
-    setTimeout(() => input.classList.remove('error'), 500);
-    input.focus();
+  setLoading(true);
+  try {
+    const result = await callAuthAPI('login', { phone: phone });
+    setLoading(false);
+
+    if (!result.ok) {
+      errorEl.textContent = result.error || '오류가 발생했습니다';
+      return;
+    }
+
+    // 상태별 처리
+    if (result.status === '승인') {
+      // 로그인 성공
+      saveAuthSession(result.name, result.phone);
+      closeAuth();
+      enableDealerView();
+      toast(`✓ ${result.name}님, 환영합니다`);
+    } else if (result.status === '대기') {
+      // 이미 신청했으나 승인 대기 중
+      document.getElementById('pending-name').textContent = result.name;
+      document.getElementById('pending-phone').textContent = formatPhone(result.phone || phone);
+      showAuthStep('pending');
+    } else if (result.status === '거부') {
+      showAuthStep('rejected');
+    } else if (result.status === '미등록') {
+      // 자동으로 가입 화면으로 전환
+      errorEl.textContent = '등록되지 않은 연락처입니다';
+      phoneInput.classList.add('error');
+      setTimeout(() => {
+        switchToRegister();
+      }, 800);
+    } else {
+      errorEl.textContent = '알 수 없는 상태입니다';
+    }
+  } catch (err) {
+    setLoading(false);
+    errorEl.textContent = '네트워크 오류 — 다시 시도해 주세요';
+    console.error(err);
   }
 }
 
-// 엔터키로 인증
-document.getElementById('auth-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') verifyAuth();
+// ============================================
+// 신규 가입 처리
+// ============================================
+async function doRegister() {
+  const nameInput = document.getElementById('reg-name');
+  const phoneInput = document.getElementById('reg-phone');
+  const errorEl = document.getElementById('reg-error');
+  const name = nameInput.value.trim();
+  const phone = phoneInput.value.trim();
+
+  nameInput.classList.remove('error');
+  phoneInput.classList.remove('error');
+
+  if (!name) {
+    errorEl.textContent = '이름을 입력하세요';
+    nameInput.classList.add('error');
+    nameInput.focus();
+    return;
+  }
+  if (name.length < 2) {
+    errorEl.textContent = '이름은 2자 이상 입력하세요';
+    nameInput.classList.add('error');
+    return;
+  }
+  if (!phone) {
+    errorEl.textContent = '연락처를 입력하세요';
+    phoneInput.classList.add('error');
+    return;
+  }
+  if (!isValidPhone(phone)) {
+    errorEl.textContent = '올바른 연락처 형식이 아닙니다';
+    phoneInput.classList.add('error');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const result = await callAuthAPI('register', { name: name, phone: phone });
+    setLoading(false);
+
+    if (!result.ok) {
+      errorEl.textContent = result.error || '오류가 발생했습니다';
+      return;
+    }
+
+    // 상태별 처리
+    if (result.status === '승인') {
+      // 이미 승인된 번호
+      saveAuthSession(result.name, phone);
+      closeAuth();
+      enableDealerView();
+      toast(`✓ ${result.name}님, 이미 등록된 회원입니다`);
+    } else {
+      // 신규 등록됨 또는 이미 대기중 → 승인 대기 화면
+      document.getElementById('pending-name').textContent = name;
+      document.getElementById('pending-phone').textContent = formatPhone(phone);
+      showAuthStep('pending');
+    }
+  } catch (err) {
+    setLoading(false);
+    errorEl.textContent = '네트워크 오류 — 다시 시도해 주세요';
+    console.error(err);
+  }
+}
+
+// ============================================
+// 이벤트 바인딩
+// ============================================
+// 로그인 화면 엔터
+document.getElementById('auth-phone').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
   if (e.key === 'Escape') closeAuth();
 });
+
+// 연락처 자동 포맷
+function bindPhoneFormat(inputId) {
+  const input = document.getElementById(inputId);
+  input.addEventListener('input', e => {
+    let n = normalizePhone(e.target.value);
+    if (n.length > 11) n = n.slice(0, 11);
+    let formatted = n;
+    if (n.length >= 4 && n.length <= 7) {
+      formatted = `${n.slice(0,3)}-${n.slice(3)}`;
+    } else if (n.length >= 8) {
+      formatted = `${n.slice(0,3)}-${n.slice(3,7)}-${n.slice(7)}`;
+    }
+    e.target.value = formatted;
+  });
+}
+bindPhoneFormat('auth-phone');
+bindPhoneFormat('reg-phone');
+
+// 가입 화면 엔터
+document.getElementById('reg-name').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('reg-phone').focus();
+});
+document.getElementById('reg-phone').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doRegister();
+});
+
+// 배경 클릭 시 닫기
 document.getElementById('auth-bg').addEventListener('click', e => {
   if (e.target.id === 'auth-bg') closeAuth();
 });
 
-// 대리점가 표시 활성화
+// ============================================
+// 대리점가 표시 활성화/비활성화
+// ============================================
 function enableDealerView() {
   state.showDealer = true;
   const btn = document.getElementById('dealer-toggle');
@@ -1215,17 +1567,16 @@ function enableDealerView() {
   btn.classList.add('visible');
   label.textContent = '대리점가 숨기기';
 
-  // 잠금 버튼 표시 (우측 상단)
   const lockBtn = document.getElementById('lock-btn');
   lockBtn.style.display = 'flex';
-  lockBtn.title = '대리점가 인증됨 (클릭 시 로그아웃)';
+  const user = getCurrentUser();
+  lockBtn.title = user ? `${user.name}님 로그인 중 (클릭 시 로그아웃)` : '대리점가 인증됨';
 
   render();
   const sheetDealer = document.getElementById('sheet-dealer-block');
   if (sheetDealer) sheetDealer.classList.toggle('show', true);
 }
 
-// 대리점가 표시 비활성화
 function disableDealerView() {
   state.showDealer = false;
   const btn = document.getElementById('dealer-toggle');
@@ -1233,7 +1584,6 @@ function disableDealerView() {
   btn.classList.remove('visible');
   label.textContent = '대리점가 보기';
 
-  // 잠금 버튼 숨김
   document.getElementById('lock-btn').style.display = 'none';
 
   render();
@@ -1262,7 +1612,7 @@ document.getElementById('confirm-bg').addEventListener('click', e => {
 document.getElementById('lock-btn').addEventListener('click', openConfirm);
 
 // ============================================
-// 대리점가 토글 (보안 강화 버전)
+// 대리점가 토글
 // ============================================
 document.getElementById('dealer-toggle').addEventListener('click', () => {
   if (state.showDealer) {
@@ -1282,7 +1632,7 @@ document.getElementById('dealer-toggle').addEventListener('click', () => {
   if (isAuthValid()) {
     // 세션 유효 → 바로 표시
     enableDealerView();
-    toast('⚠ 대리점가(매입가) 표시 중 — 고객 화면 주의');
+    toast('⚠ 대리점가 표시 중 — 고객 화면 주의');
   } else {
     // 세션 없음 → 인증 요구
     openAuth();
@@ -1294,10 +1644,10 @@ document.getElementById('dealer-toggle').addEventListener('click', () => {
 // ============================================
 (function restoreAuthState() {
   if (isAuthValid()) {
-    // 세션 유효하면 잠금 버튼만 표시 (자동 표시는 하지 않음 — 프라이버시)
     const lockBtn = document.getElementById('lock-btn');
     lockBtn.style.display = 'flex';
-    lockBtn.title = '대리점가 인증됨 (7일 세션 유효)';
+    const user = getCurrentUser();
+    lockBtn.title = user ? `${user.name}님 로그인 중 (클릭 시 로그아웃)` : '대리점가 인증됨';
   }
 })();
 
