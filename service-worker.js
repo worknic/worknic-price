@@ -1,8 +1,7 @@
 // WORKNIC Price App — Service Worker
 // 버전이 바뀔 때마다 CACHE_NAME의 날짜를 변경하면 팀원들이 자동으로 최신 버전으로 업데이트됩니다.
 // 예: 가격표 업데이트 후 → CACHE_NAME = 'worknic-price-2026-05-01'
-
-const CACHE_NAME = 'worknic-price-2026-04-17-v3';
+const CACHE_NAME = 'worknic-price-2026-04-21-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -10,7 +9,6 @@ const ASSETS = [
   './icon-192.png',
   './icon-512.png'
 ];
-
 // 설치 단계 - 핵심 파일들 캐싱
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -18,7 +16,6 @@ self.addEventListener('install', event => {
   );
   self.skipWaiting();
 });
-
 // 활성화 - 이전 버전 캐시 삭제
 self.addEventListener('activate', event => {
   event.waitUntil(
@@ -30,11 +27,11 @@ self.addEventListener('activate', event => {
   );
   self.clients.claim();
 });
-
 // 요청 - 캐시 우선, 없으면 네트워크 (오프라인에서도 작동)
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
-
+  // /dispatch/ 경로는 Service Worker가 간섭하지 않음 (별도 배포물)
+  if (new URL(event.request.url).pathname.startsWith('/dispatch/')) return;
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) return cached;
@@ -46,8 +43,11 @@ self.addEventListener('fetch', event => {
         }
         return response;
       }).catch(() => {
-        // 오프라인 + 캐시 미스 시 index.html 반환
-        return caches.match('./index.html');
+        // 오프라인 + 캐시 미스 시 index.html 반환 (루트 경로만)
+        if (new URL(event.request.url).pathname === '/' || 
+            new URL(event.request.url).pathname === '/index.html') {
+          return caches.match('./index.html');
+        }
       });
     })
   );
