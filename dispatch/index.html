@@ -8,6 +8,32 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="WORKNIC">
 <title>WORKNIC · THE DISPATCH</title>
+
+<!-- ═══ 아이콘 · 홈화면 저장 시 쉼표 로고 ═══ -->
+<link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./icons/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icons/icon-512.png">
+
+<!-- ═══ Open Graph · 카카오톡·SNS 공유 썸네일 ═══ -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="WORKNIC">
+<meta property="og:title" content="WORKNIC · THE DISPATCH">
+<meta property="og:description" content="도구를 고르는 기준은, 결국 삶의 태도입니다">
+<meta property="og:image" content="https://price.worknic.co.kr/dispatch/icons/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://price.worknic.co.kr/dispatch/">
+<meta property="og:locale" content="ko_KR">
+
+<!-- 카카오톡 전용 태그 -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="WORKNIC · THE DISPATCH">
+<meta name="twitter:description" content="도구를 고르는 기준은, 결국 삶의 태도입니다">
+<meta name="twitter:image" content="https://price.worknic.co.kr/dispatch/icons/og-image.png">
+<meta name="description" content="도구를 고르는 기준은, 결국 삶의 태도입니다 · 포천 WORKNIC">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -55,22 +81,55 @@
 
   /* ══ LOADING OVERLAY ═════════════════════ */
   .loading-overlay{
-    position:fixed;inset:0;background:rgba(245,241,235,.92);
-    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    position:fixed;inset:0;background:rgba(245,241,235,.95);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
     z-index:2000;display:none;align-items:center;justify-content:center;
     max-width:480px;margin:0 auto;
   }
   .loading-overlay.show{display:flex}
-  .loading-spinner{
-    width:32px;height:32px;border:2px solid var(--line-2);border-top-color:var(--dark);
-    border-radius:50%;animation:spin .8s linear infinite;
+  .loading-overlay .wrap{
+    text-align:center;
+    animation:loadingFade .6s var(--ease-out);
   }
-  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes loadingFade{
+    from{opacity:0}
+    to{opacity:1}
+  }
+  /* 쉼표 로고 펄싱 · 연한색 → 진한색 */
+  .loading-comma{
+    width:68px;height:68px;margin:0 auto;
+    background-image:url('./assets/comma_dark.png');
+    background-size:contain;background-position:center;background-repeat:no-repeat;
+    animation:commaPulse 2.4s ease-in-out infinite;
+    filter:brightness(0.6);
+  }
+  @keyframes commaPulse{
+    0%, 100%{
+      opacity:.22;
+      transform:scale(.96);
+      filter:brightness(1);
+    }
+    50%{
+      opacity:1;
+      transform:scale(1);
+      filter:brightness(0.85);
+    }
+  }
   .loading-text{
-    margin-top:14px;font-family:'IBM Plex Mono',monospace;font-size:10px;
-    letter-spacing:.15em;color:var(--muted);text-transform:uppercase;font-weight:500;
+    margin-top:22px;font-family:'Spoqa Han Sans Neo',sans-serif;
+    font-size:13px;font-weight:400;letter-spacing:-.01em;
+    color:var(--dark-3);text-align:center;
+    animation:textFade 3s ease-in-out infinite;
   }
-  .loading-overlay .wrap{text-align:center}
+  @keyframes textFade{
+    0%, 100%{opacity:.55}
+    50%{opacity:.9}
+  }
+  .loading-sub{
+    margin-top:6px;font-family:'IBM Plex Mono',monospace;
+    font-size:9px;letter-spacing:.22em;color:var(--muted);
+    font-weight:500;text-transform:uppercase;text-align:center;
+  }
 
   /* ══ OFFLINE BANNER ═════════════════════ */
   .offline-banner{
@@ -649,8 +708,9 @@
 <!-- LOADING OVERLAY -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="wrap">
-    <div class="loading-spinner"></div>
-    <div class="loading-text" id="loadingText">연결 중</div>
+    <div class="loading-comma"></div>
+    <div class="loading-text" id="loadingText">잠시 숨을 고르는 중입니다</div>
+    <div class="loading-sub">WORKNIC</div>
   </div>
 </div>
 
@@ -1048,6 +1108,10 @@
         <input type="number" id="pf_commission" placeholder="5" value="5" step="0.5" inputmode="decimal">
       </div>
     </div>
+    <div class="form-group">
+      <label>상세 페이지 URL (선택)</label>
+      <input type="url" id="pf_detailUrl" placeholder="https://smartstore.naver.com/worknic/...">
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
       <button class="btn" onclick="closeModal('productFormModal')">취소</button>
       <button class="btn btn-primary" onclick="saveProduct()">저장</button>
@@ -1189,6 +1253,7 @@ function normalizeProduct(p){
     stock: Number(p.stock) || 0,
     initialStock: Number(p.initialStock) || 0,
     commission: Number(p.commission) || 5,
+    detailUrl: String(p.detailUrl||''),
     updatedAt: Number(p.updatedAt) || 0
   };
 }
@@ -1539,6 +1604,13 @@ function fmtPrice(n){return '₩ '+Number(n).toLocaleString()}
 function fmtSave(orig,price){if(!orig||orig<=price)return '';return Math.round((1-price/orig)*100)+'% OFF'}
 
 const talkIcon = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.48 3 2 6.58 2 11c0 2.56 1.48 4.84 3.8 6.36-.15.57-.66 2.3-.77 2.67-.13.46.17.46.36.33.14-.09 2.28-1.55 3.19-2.18.77.14 1.57.22 2.42.22 5.52 0 10-3.58 10-8s-4.48-8-10-8z"/></svg>';
+const detailIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
+
+function openDetail(productId){
+  const p = state.products.find(x=>x.id===productId);
+  if(!p || !p.detailUrl) return;
+  window.open(p.detailUrl, '_blank');
+}
 
 function renderCards(){
   const list = document.getElementById('productList');
@@ -1588,6 +1660,12 @@ function renderCards(){
           ${talkIcon}<span>톡톡 문의</span>
         </button>
       </div>
+      ${p.detailUrl ? `
+      <div class="actions-row2">
+        <button class="btn btn-ghost btn-with-icon" onclick="haptic();openDetail('${p.id}')">
+          ${detailIcon}<span>상세 정보 보기</span>
+        </button>
+      </div>` : ''}
       <div class="calc-wrap">
         <div class="calc-title">실제 판매가 → 내 커미션</div>
         <div class="calc-row">
@@ -1644,7 +1722,8 @@ function copyMessage(id){
   if(isPreviewMode){toast('미리보기 모드');return}
   const p = state.products.find(x=>x.id===id);if(!p)return;
   const link = buildLink(id);
-  const msg = `[WORKNIC · 포천]\n\n${p.name}\n\n${fmtPrice(p.price)}${p.origin>p.price?`  (정가 ${fmtPrice(p.origin)})`:''}\n\n주문 링크\n${link}\n\n입금 계좌\n${PAYMENT_ACCOUNT}\n\n자세한 문의\nhttp://talk.naver.com/W4QYTH\n\n도구를 고르는 기준은, 결국 삶의 태도입니다\n포천 WORKNIC`;
+  const detailBlock = p.detailUrl ? `\n\n상품 상세\n${p.detailUrl}` : '';
+  const msg = `[WORKNIC · 포천]\n\n${p.name}\n\n${fmtPrice(p.price)}${p.origin>p.price?`  (정가 ${fmtPrice(p.origin)})`:''}${detailBlock}\n\n입금 계좌\n${PAYMENT_ACCOUNT}\n\n자세한 문의\nhttp://talk.naver.com/W4QYTH\n\n도구를 고르는 기준은, 결국 삶의 태도입니다\n포천 WORKNIC`;
   navigator.clipboard.writeText(msg).then(()=>{
     toast('문자 복사 완료');
     logEventBackground({type:'attempt', productId:id, productName:p.name, partner:partnerCode});
@@ -1903,7 +1982,7 @@ function renderAdminProducts(){
 }
 function openProductForm(){
   document.getElementById('pfTitle').textContent = '상품 추가';
-  ['pf_id','pf_name','pf_code','pf_price','pf_origin','pf_stock'].forEach(k=>document.getElementById(k).value='');
+  ['pf_id','pf_name','pf_code','pf_price','pf_origin','pf_stock','pf_detailUrl'].forEach(k=>document.getElementById(k).value='');
   document.getElementById('pf_brand').value = 'makita';
   document.getElementById('pf_commission').value = '5';
   openModal('productFormModal');
@@ -1919,6 +1998,7 @@ function editProduct(id){
   document.getElementById('pf_origin').value = p.origin;
   document.getElementById('pf_stock').value = p.stock;
   document.getElementById('pf_commission').value = p.commission||5;
+  document.getElementById('pf_detailUrl').value = p.detailUrl || '';
   openModal('productFormModal');
 }
 async function saveProduct(){
@@ -1930,8 +2010,9 @@ async function saveProduct(){
   const origin = Number(document.getElementById('pf_origin').value) || price;
   const stock = Number(document.getElementById('pf_stock').value);
   const commission = Number(document.getElementById('pf_commission').value) || 5;
+  const detailUrl = document.getElementById('pf_detailUrl').value.trim();
   if(!name||!code||!price||stock<0){toast('필수 항목을 확인해주세요');return}
-  const product = {id, name, brand, code, price, origin, stock, commission};
+  const product = {id, name, brand, code, price, origin, stock, commission, detailUrl};
   if(!id) product.initialStock = stock;
   showLoading('저장 중');
   try {
@@ -2071,7 +2152,7 @@ async function init(){
   attachPhoneFormatters();
 
   if(isAdminSession()){
-    showLoading('데이터 불러오는 중');
+    showLoading('잠시 숨을 고르는 중입니다');
     try { await loadAll() } catch(e){}
     hideLoading();
     enterAdminHome();
@@ -2079,7 +2160,7 @@ async function init(){
   }
 
   /* 파트너 세션 체크 */
-  showLoading('연결 중');
+  showLoading('잠시 숨을 고르는 중입니다');
   try {
     const ok = await checkSession();
     if(ok){enterMainApp();return}
